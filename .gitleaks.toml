@@ -1,0 +1,11 @@
+title = "DTN Postmaster skills-dev Gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documentation examples using RFC 5737 / radioamateur callsign placeholders"
+regexes = [
+  '''F[0-9]TEST''',
+  '''N0CALL''',
+]

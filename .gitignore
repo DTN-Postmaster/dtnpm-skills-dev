@@ -1,0 +1,15 @@
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local Python / temporary test artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+tmp/
+scratch/
