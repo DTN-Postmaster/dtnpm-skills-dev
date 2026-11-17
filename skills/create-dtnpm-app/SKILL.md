@@ -75,7 +75,7 @@ Keep the standard options:
 ### 7. Optional Integration into `dtnpm`
 
 If the application is to be embedded or listed in `dtnpm`:
-- Add the optional dependency in `dtnpm/Cargo.toml` under `[features]` (or a dedicated `emcom` / `amsat` profile depending on the target).
+- Add the optional dependency in `dtnpm/Cargo.toml` under `[features]` (or a dedicated `desktop` / `amsat` profile depending on the target).
 - Do not expose duplicate binaries if its own repository already distributes it.
 
 ## Mandatory Verification
