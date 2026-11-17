@@ -1,11 +1,11 @@
-# Contribuer à `skills-dev`
+# Contributing to `skills-dev`
 
-Merci de contribuer aux compétences développeurs de l'écosystème `dtn-postmaster`.
+Thank you for contributing to the developer skills for the `dtn-postmaster` ecosystem.
 
-## Ajouter ou modifier une skill
+## Adding or Modifying a Skill
 
-1. Créez un répertoire en `kebab-case` sous `skills/<nom-skill>/` contenant un fichier `SKILL.md`.
-2. Vérifiez que le frontmatter YAML contient `name` (= nom du dossier) et `description` (clair, concis, 3e personne, déclencheurs explicites).
-3. Vérifiez chaque nom de trait, chemin de template, flag CLI ou cible fuzz directement dans le dépôt concerné (`template-dtnpm-*`, `dtnpm-core`, `dtnpm-web-core`, `dtnpm`, `dtnpm-cla-*`) avant de le documenter.
-4. Évitez les fichiers temporaires et les marqueurs de tâches inachevées.
-5. Exécutez `./scripts/validate-skills.sh` et vérifiez que toutes les vérifications passent avant d'ouvrir une Pull Request.
+1. Create a `kebab-case` directory under `skills/<skill-name>/` containing a `SKILL.md` file.
+2. Verify that the YAML frontmatter contains `name` (= directory name) and `description` (clear, concise, third-person, explicit triggers).
+3. Verify every trait name, template path, CLI flag, or fuzz target directly in the relevant repository (`template-dtnpm-*`, `dtnpm-core`, `dtnpm-web-core`, `dtnpm`, `dtnpm-cla-*`) before documenting it.
+4. Avoid temporary files and unfinished task markers.
+5. Run `./scripts/validate-skills.sh` and verify that all checks pass before opening a Pull Request.

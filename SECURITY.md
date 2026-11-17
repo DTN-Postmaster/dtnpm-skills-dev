@@ -1,15 +1,15 @@
-# Politique de sécurité — `skills-dev`
+# Security Policy — `skills-dev`
 
-## Objectif de sécurité
+## Security Objective
 
-Les skills fournies dans `skills-dev` guident l'écriture de code Rust/TypeScript et la configuration de services réseau et radioamateurs. En conséquence, un mauvais exemple dans une `SKILL.md` introduit directement des vulnérabilités chez les utilisateurs finaux.
+The skills provided in `skills-dev` guide the writing of Rust/TypeScript code and the configuration of network and amateur radio services. Consequently, a bad example in a `SKILL.md` directly introduces vulnerabilities for end users.
 
-Les contributions doivent systématiquement proscrire :
-- Les valeurs par défaut non authentifiées ou non chiffrées sans avertissement et drapeau d'opt-in explicite.
-- Le passage de secrets via arguments CLI en clair plutôt que `--token-file` ou stdin sécurisé.
-- Les appels paniquants en code applicatif Rust (`unwrap()`, `expect()`) et les constructions SQL/HTML non paramétrées (`dangerouslySetInnerHTML` sans assainissement strict).
-- L'utilisation d'actions GitHub non épinglées par SHA-1 complet.
+Contributions must systematically prohibit:
+- Unauthenticated or unencrypted defaults without a warning and an explicit opt-in flag.
+- Passing secrets via cleartext CLI arguments instead of `--token-file` or secure stdin.
+- Panicking calls in application Rust code (`unwrap()`, `expect()`) and unparameterized SQL/HTML constructions (`dangerouslySetInnerHTML` without strict sanitization).
+- Using GitHub Actions not pinned by full SHA-1.
 
-## Signaler une vulnérabilité ou une recommandation dangereuse
+## Reporting a Vulnerability or Dangerous Recommendation
 
-Si vous identifiez une erreur de sécurité dans une skill ou un workflow de ce dépôt, veuillez ouvrir un signalement privé auprès des mainteneurs (`security@dtn-postmaster.org`) ou via l'onglet GitHub Security Advisories avant toute divulgation publique.
+If you identify a security error in a skill or workflow of this repository, please open a private report with the maintainers (`security@dtn-postmaster.org`) or via the GitHub Security Advisories tab prior to any public disclosure.

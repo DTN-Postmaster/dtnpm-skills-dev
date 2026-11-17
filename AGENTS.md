@@ -1,24 +1,28 @@
 # AGENTS.md — DTN Postmaster (`skills-dev`)
 
-Ce document encadre le travail des agents IA et contributeurs sur le dépôt `skills-dev`.
+This document governs the work of AI agents and contributors on the `skills-dev` repository.
 
-## Règles de conception des `SKILL.md`
+## Documentation Language
 
-1. **Format Antigravity strict** :
-   - Chaque skill réside dans `skills/<nom-kebab-case>/SKILL.md`.
-   - Le frontmatter YAML est obligatoire et doit déclarer :
-     - `name` : identique au nom du dossier (`^[a-z0-9]+(-[a-z0-9]+)*$`).
-     - `description` : à la troisième personne, décrivant **ce que fait** la skill et **quand l'activer** (mots-clés précis : traits Rust, templates, commandes, frameworks de conformité), sans dépasser 1024 caractères.
-2. **Vérité terrain (Zero Hallucination)** :
-   - Toute signature Rust, route HTTP, flag CLI, variable d'environnement, cible de fuzzing ou chemin de fichier cité dans une skill doit provenir directement du code source vérifié dans l'organisation `dtn-postmaster`.
-   - Ne jamais inventer de commandes, d'options ou de fichiers inexistants.
-3. **Sécurité par défaut (Secure-by-Default)** :
-   - Les instructions de développement doivent promouvoir le respect du EU Cyber Resilience Act (CRA), OWASP ASVS, BPSec strict/warn, zéro `.unwrap()` / `.expect()` en production Rust, gRPC authentifié par UDS + token (`--token-file`), et opt-in explicite avec journalisation `warn!` pour tout comportement dégradé.
-4. **Hygiène CI & Dépôt** :
-   - Actions GitHub obligatoirement épinglées par SHA-1 (40 caractères) avec `permissions: contents: read` et `step-security/harden-runner`.
-   - Aucun secret ni clé réelle ; seuls les indicatifs de test radioamateur (`F*TEST`, `N0CALL`) sont tolérés dans les exemples.
+English must be used as the language for all documentation, unless the file is suffixed with `.fr.md` or another language is explicitly requested in the prompt.
 
-## Vérification obligatoire avant commit
+## `SKILL.md` Design Rules
+
+1. **Strict Antigravity format**:
+   - Each skill lives in `skills/<kebab-case-name>/SKILL.md`.
+   - YAML frontmatter is mandatory and must declare:
+     - `name`: identical to the directory name (`^[a-z0-9]+(-[a-z0-9]+)*$`).
+     - `description`: in the third person, describing **what the skill does** and **when to activate it** (precise keywords: Rust traits, templates, commands, compliance frameworks), not exceeding 1024 characters.
+2. **Ground truth (Zero Hallucination)**:
+   - Every Rust signature, HTTP route, CLI flag, environment variable, fuzzing target, or file path cited in a skill must come directly from verified source code in the `dtn-postmaster` organization.
+   - Never invent non-existent commands, options, or files.
+3. **Secure-by-Default**:
+   - Development instructions must promote compliance with the EU Cyber Resilience Act (CRA), OWASP ASVS, strict/warn BPSec, zero `.unwrap()` / `.expect()` in production Rust code, gRPC authenticated via UDS + token (`--token-file`), and explicit opt-in with `warn!` logging for any degraded behavior.
+4. **CI & Repository Hygiene**:
+   - GitHub Actions must be pinned by full SHA-1 (40 characters) with `permissions: contents: read` and `step-security/harden-runner`.
+   - No real secrets or keys; only amateur radio test callsigns (`F*TEST`, `N0CALL`) are allowed in examples.
+
+## Mandatory Verification Before Commit
 
 ```bash
 ./scripts/install-hooks.sh

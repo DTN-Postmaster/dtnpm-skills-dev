@@ -4,71 +4,71 @@ description: >-
   Guides creation of a Convergence Layer Adapter (`dtnpm-cla-*`) from `template-dtnpm-cla`, implementing `hardy_bpa::cla::Cla`, bounded async `Driver` channels, peer resolution, gRPC/UDS BPA registration (`--token-file`), and opt-in unauthenticated safety switches. Use when creating or extending a transport CLA for radio, UDP, serial, or KISS links.
 ---
 
-# Créer un Convergence Layer Adapter (`dtnpm-cla-*`)
+# Creating a Convergence Layer Adapter (`dtnpm-cla-*`)
 
-Cette compétence décrit la création d'un adaptateur de couche de convergence (CLA) BPv7 compatible avec le BPA Hardy et `dtnpm`, à partir de `template-dtnpm-cla`.
+This skill describes creating a BPv7 Convergence Layer Adapter (CLA) compatible with the Hardy BPA and `dtnpm`, starting from `template-dtnpm-cla`.
 
-## Architecture d'un CLA `dtnpm-cla-*`
+## Architecture of a `dtnpm-cla-*` CLA
 
-Un CLA réside dans son propre dépôt (`dtnpm-cla-<protocole>`) et suit le patron hybride `lib.rs` + `main.rs` :
-- `src/cla.rs` : implémentation du trait `hardy_bpa::cla::Cla` (`on_register`, `on_unregister`, `forward`) plus méthodes de contrôle (`cla_init`, `register_peer`, `disconnect`, `close`, `peer_resolver`).
-- `src/driver.rs` : boucle asynchrone gérant la liaison physique/réseau (UDP, TCP, KISS/TNC, série, AX.25, ARQ) via des canaux bornés `tokio::sync::mpsc`.
-- `src/config.rs` : schéma de configuration TOML/YAML avec validation stricte des paramètres et opt-ins explicites.
-- `src/error.rs` : énumération d'erreurs typées (`thiserror`) sans panique.
-- `src/main.rs` : démon autonome se connectant au BPA via `GrpcBpaClient::with_auth` / `BpaClient::as_registration`.
+A CLA lives in its own repository (`dtnpm-cla-<protocol>`) and follows the `lib.rs` + `main.rs` hybrid pattern:
+- `src/cla.rs`: implementation of the `hardy_bpa::cla::Cla` trait (`on_register`, `on_unregister`, `forward`) plus control methods (`cla_init`, `register_peer`, `disconnect`, `close`, `peer_resolver`).
+- `src/driver.rs`: asynchronous loop managing the physical/network link (UDP, TCP, KISS/TNC, serial, AX.25, ARQ) via bounded `tokio::sync::mpsc` channels.
+- `src/config.rs`: TOML/YAML configuration schema with strict parameter validation and explicit opt-ins.
+- `src/error.rs`: typed error enum (`thiserror`) without panics.
+- `src/main.rs`: standalone daemon connecting to the BPA via `GrpcBpaClient::with_auth` / `BpaClient::as_registration`.
 
-## Étapes d'instanciation
+## Instantiation Steps
 
-### 1. Dupliquer `template-dtnpm-cla`
+### 1. Duplicate `template-dtnpm-cla`
 
 ```bash
-cp -r ../template-dtnpm-cla dtnpm-cla-<protocole>
-cd dtnpm-cla-<protocole>
+cp -r ../template-dtnpm-cla dtnpm-cla-<protocol>
+cd dtnpm-cla-<protocol>
 rm -rf .git target
 git init -b main
 ```
 
-Mettre à jour `Cargo.toml` (`package.name`, `[lib]`, `[[bin]]`) et `src/main.rs`.
+Update `Cargo.toml` (`package.name`, `[lib]`, `[[bin]]`) and `src/main.rs`.
 
-### 2. Implémenter le trait `Cla` (`src/cla.rs`)
+### 2. Implement the `Cla` Trait (`src/cla.rs`)
 
-- Conserver les champs principaux : `config: ClaConfig` et `inner: Arc<RwLock<Option<ClaInner>>>` (stockant `Arc<dyn Sink>`, `Arc<TaskPool>`, `mpsc::Sender<DriverCommand>`, et `JoinHandle<()>`).
-- **`cla_init(&self) -> ClaInit`** : définir `address_type`, `lane_count` (`NonZeroU32`), et `max_bundle_size` (`NonZeroU64`).
-- **`on_register` / `on_unregister`** : démarrer / arrêter proprement la tâche `Driver` via canal de commande borné.
-- **`forward`** :
-  - Lire le flux de bundle de façon bornée (`buffer_stream(stream, total_len)` avec contrôle strict <= `max_frame_size` / `max_bundle_size`).
-  - Envoyer au driver avec `tokio::time::timeout` pour éviter tout blocage indéfini du BPA, puis renvoyer `ForwardBundleResult`.
-- **Réception** : le driver délivre les bundles entrants au BPA via `sink.dispatch(node_id, Some(&cla_addr), &mut bundle_data).await`.
+- Keep the core fields: `config: ClaConfig` and `inner: Arc<RwLock<Option<ClaInner>>>` (storing `Arc<dyn Sink>`, `Arc<TaskPool>`, `mpsc::Sender<DriverCommand>`, and `JoinHandle<()>`).
+- **`cla_init(&self) -> ClaInit`**: set `address_type`, `lane_count` (`NonZeroU32`), and `max_bundle_size` (`NonZeroU64`).
+- **`on_register` / `on_unregister`**: cleanly start / stop the `Driver` task via a bounded command channel.
+- **`forward`**:
+  - Read the bundle stream in a bounded manner (`buffer_stream(stream, total_len)` with strict check <= `max_frame_size` / `max_bundle_size`).
+  - Send to the driver with `tokio::time::timeout` to prevent indefinite blocking of the BPA, then return `ForwardBundleResult`.
+- **Reception**: the driver delivers incoming bundles to the BPA via `sink.dispatch(node_id, Some(&cla_addr), &mut bundle_data).await`.
 
-### 3. Sécurité réseau, RF et authentification par défaut
+### 3. Network, RF, and Default Authentication Security
 
-Tout nouveau CLA doit respecter les garde-fous de l'écosystème :
-- **Canaux et tampons bornés** : ne jamais utiliser `mpsc::unbounded_channel()`, ni allouer selon une longueur lue sur le fil sans plafond explicite (`max_frame_size` / MTU / taille de segment maximale).
-- **Anti-usurpation / migration d'adresse (liens IP/UDP)** :
-  - Désactiver par défaut l'apprentissage dynamique ou la migration d'IP sans authentification (`allow_ip_migration = false` par défaut par pair).
-  - Si un mode non authentifié existe pour le développement ou des liens déjà chiffrés (WireGuard/VPN), exiger un opt-in explicite (ex. `--allow-unauthenticated-udp` ou `--allow-unauthenticated-bps-opt-in`) accompagné d'un log `warn!` bien visible.
-- **Identification radioamateur (liens RF / KISS / AX.25 / ARQ)** :
-  - Exiger l'indicatif local (`callsign` / `--require-callsign`) par défaut ; n'autoriser le trafic RF non identifié que via opt-in explicite (modèle `--allow-unidentified-rf` utilisé dans `dtnpm-cla-hqfbp-kiss` et `dtnpm-cla-mercury-arq`).
-- **Session & FSM (liens ARQ/LTP)** :
-  - Borner le nombre maximal de sessions actives et le temps de vie d'une session orpheline pour prévenir les attaques par épuisement mémoire (DoS).
+Every new CLA must adhere to the ecosystem's safeguards:
+- **Bounded channels and buffers**: never use `mpsc::unbounded_channel()`, nor allocate based on a wire-read length without an explicit ceiling (`max_frame_size` / MTU / max segment size).
+- **Anti-spoofing / address migration (IP/UDP links)**:
+  - Disable dynamic learning or unauthenticated IP migration by default (`allow_ip_migration = false` by default per peer).
+  - If an unauthenticated mode exists for development or already-encrypted links (WireGuard/VPN), require an explicit opt-in (e.g., `--allow-unauthenticated-udp` or `--allow-unauthenticated-bps-opt-in`) accompanied by a clearly visible `warn!` log.
+- **Amateur radio identification (RF / KISS / AX.25 / ARQ links)**:
+  - Require the local callsign (`callsign` / `--require-callsign`) by default; only allow unidentified RF traffic via an explicit opt-in (`--allow-unidentified-rf` pattern used in `dtnpm-cla-hqfbp-kiss` and `dtnpm-cla-mercury-arq`).
+- **Session & FSM (ARQ/LTP links)**:
+  - Bound the maximum number of active sessions and the lifetime of an orphaned session to prevent memory exhaustion (DoS) attacks.
 
-### 4. Authentification gRPC / UDS vers le BPA (`src/main.rs`)
+### 4. gRPC / UDS Authentication to the BPA (`src/main.rs`)
 
-- Supporter `--socket` / `DTN_HDY_SOCKET` pour Unix Domain Socket.
-- Supporter `--token-file` / `DTN_HDY_TOKEN_FILE` en priorité sur `--token`.
-- Documenter les décisions de protocole et compromis de sécurité dans `adr/`.
+- Support `--socket` / `DTN_HDY_SOCKET` for Unix Domain Socket.
+- Support `--token-file` / `DTN_HDY_TOKEN_FILE` with priority over `--token`.
+- Document protocol decisions and security trade-offs in `adr/`.
 
-### 5. Fuzzing recommandé
+### 5. Recommended Fuzzing
 
-Pour tout CLA parsant des trames binaires (SDNV, KISS, HDLC, en-têtes protocolaires), créer une cible `cargo-fuzz` dans `fuzz/fuzz_targets/` alimentant directement le décodeur avec des octets arbitraires (`&[u8]`) afin de vérifier l'absence de panique, d'overflow arithmétique et de boucle infinie.
+For any CLA parsing binary frames (SDNV, KISS, HDLC, protocol headers), create a `cargo-fuzz` target in `fuzz/fuzz_targets/` feeding arbitrary bytes (`&[u8]`) directly to the decoder to verify the absence of panics, arithmetic overflows, and infinite loops.
 
-### 6. Intégration dans `dtnpm`
+### 6. Integration into `dtnpm`
 
-Lorsque le CLA est prêt à être embarqué dans le binaire unifié :
-- Ajouter une feature `cla-<protocole> = ["node", "dep:dtnpm-cla-<protocole>"]` dans `dtnpm/Cargo.toml`.
-- Lier sa configuration sous `[[clas]]` dans `dtnpm`.
+When the CLA is ready to be embedded in the unified binary:
+- Add a feature `cla-<protocol> = ["node", "dep:dtnpm-cla-<protocol>"]` in `dtnpm/Cargo.toml`.
+- Wire its configuration under `[[clas]]` in `dtnpm`.
 
-## Vérification obligatoire
+## Mandatory Verification
 
 ```bash
 ./scripts/install-hooks.sh
