@@ -1,7 +1,7 @@
 ---
 name: dtnpm-testing-and-fuzzing
 description: >-
-  Guides execution and authoring of unit tests, integration tests (`TestServerBuilder`, `iam_integration_test`, `bpsec_chat_files_test`), offline feature matrix checks, Playwright E2E UI tests, radio E2E simulation scripts (`dtnpm/examples/`), and `cargo-fuzz` targets. Use when validating changes, debugging CI, or running fuzzing campaigns.
+  Guides execution and authoring of unit tests, integration tests (`TestServerBuilder`, `iam_integration_test`, `bpsec_chat_files_test`), offline feature matrix checks, Playwright E2E UI tests, radio and ESP-NOW over-the-air KISS E2E simulation scripts (`dtnpm/examples/`), and `cargo-fuzz` targets. Use when validating changes, debugging CI, or running fuzzing campaigns.
 ---
 
 # Testing, E2E Simulations, Playwright, and Fuzzing (`dtnpm`)
@@ -71,7 +71,13 @@ Demonstration and end-to-end validation scripts are located in `dtnpm/examples/`
 - **Hardy Duo**: `dtnpm/examples/run_e2e_hardy_duo.sh` / `dtnpm/examples/test_e2e_hardy_duo.py`
 - **Direwolf Software Modem (HQFBP / KISS)**: `dtnpm/examples/launch_dual_direwolf.sh`, `dtnpm/examples/test_direwolf_hqfbp.sh`, `dtnpm/examples/test_bidirectional_direwolf.sh`
 - **Mercury Modem (ARQ / LTP)**: `dtnpm/examples/launch_dual_mercury.sh`, `dtnpm/examples/test_simplex_mercury_ltp.sh`
+- **ESP-NOW Over-the-Air KISS (`esp-pdu-tnc`)**: `dtnpm/examples/stata-esp-ltp.yaml`, `dtnpm/examples/statb-esp-ltp.yaml`, `dtnpm/examples/stata-esp-hqfbp.yaml`, `dtnpm/examples/statb-esp-hqfbp.yaml` targeting TCP KISS ports `18001` / `18011` (no CAT server required; 250-byte ESP-NOW MTU).
 - **Application Services**: `dtnpm/examples/test_basket.py`, `dtnpm/examples/test_bib.py`, `dtnpm/examples/test_forward.py`
+
+Notes for running dual-station (`STATA`/`STATB`) KISS tests:
+- The BPA binary is `dtnpm/target/debug/dtnpm` (`dtnpm -c <CONFIG>`, replacing legacy `dtn-hdy-ham` references in older scripts).
+- Check for port conflicts with any already-running `dtnpm` instance (`3050`/`3051` gRPC, `8081`/`8082` Web) before launching.
+- For full over-the-air (`esp-pdu-tnc`, Direwolf, Mercury) channel tuning, sequential startup, and multi-segment verification procedures, see the `dtnpm-ota-kiss-testing` skill.
 
 Run from `dtnpm/` after building the binaries (`cargo build --workspace`).
 

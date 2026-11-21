@@ -13,6 +13,7 @@ Catalog of skills (`SKILL.md`) intended for developers and AI agents working on 
 | `create-dtnpm-cla` | `skills/create-dtnpm-cla/SKILL.md` | Instantiating a Convergence Layer Adapter (`hardy_bpa::cla::Cla`) and bounded async driver from `template-dtnpm-cla` |
 | `dtnpm-security-cra-audit` | `skills/dtnpm-security-cra-audit/SKILL.md` | Security audit and compliance with EU Cyber Resilience Act (CRA), OWASP ASVS/Top 10, BPSec (`VerifyPolicy`), IAM (`DTN-HDY-HAM-IAM`), and zero-unwrap Rust |
 | `dtnpm-testing-and-fuzzing` | `skills/dtnpm-testing-and-fuzzing/SKILL.md` | Unit/integration tests (`TestServerBuilder`), E2E radio simulations (`dtnpm/examples/`), Playwright, and `cargo-fuzz` campaigns |
+| `dtnpm-ota-kiss-testing` | `skills/dtnpm-ota-kiss-testing/SKILL.md` | Dual-station (`STATA`/`STATB`) over-the-air KISS TCP testing for LTP and HQFBP over `esp-pdu-tnc` (ESP-NOW 250-byte MTU), Direwolf, and Mercury |
 
 ## Installation & Discovery
 
