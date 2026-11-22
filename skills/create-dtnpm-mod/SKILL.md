@@ -58,6 +58,8 @@ git init -b main
 ### 6. Develop the Secure Preact Frontend (`ui/`)
 
 - Keep the Vite + Preact + Tailwind architecture of `ui/`.
+- **100% English UI & Playwright Specs**: All visible text (tab labels, headings, placeholders, buttons, `SecurityBadge` labels/tooltips, `aria-label`s, dialogs, and error banners) and Playwright E2E assertions must be in English. Keep shared components (`SecurityBadge.tsx`, `utils/markdown.ts`) synchronized with `dtnpm-web-core/ui`.
+- **Navigation Placement in `dtnpm-web-core`**: Administrative, routing, filtering, security, storage, or diagnostic modules must be wired as sub-tabs under **Station** (`StationSubTab` in `dtnpm-web-core/ui/src/components/ConfigView.tsx`, e.g., `Rego Routing` between `Routing (RIB)` and `BPSec Security`), capability-gated via `enabledModules` (`/api/capabilities`). Do not promote station admin panels to top-level `Navbar.tsx` tabs (reserved for primary operational views such as `Station`, `Chat`, `Files`, `SenML`, `Send Bundle`).
 - **Mandatory Anti-XSS**: reuse the hardened utility `ui/src/utils/markdown.ts` (stripping null bytes `\x00`, random nonce generation via `crypto.getRandomValues`, linear regexes against ReDoS, HTML escaping before injection, and strict blocking of `javascript:` / `data:` schemes).
 - **Trust indicator**: display `SecurityBadge` to reflect the BPSec signature status of each received message/object.
 
@@ -80,5 +82,8 @@ In `dtnpm/Cargo.toml`:
 cargo fmt --all -- --check
 cargo clippy --workspace --lib --bins -- -D warnings -D clippy::unwrap_used -D clippy::panic
 cargo test --all-targets
+cd ui && pnpm test:e2e
 ./scripts/check-security.sh --strict
 ```
+
+When integrating UI changes into `dtnpm-web-core`, also run `cd ../dtnpm-web-core/ui && pnpm build && pnpm test:e2e`.
